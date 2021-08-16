@@ -47,7 +47,7 @@ func DynamoDBKinesisStreamingDestinationDisabled(ctx context.Context, conn *dyna
 	return err
 }
 
-func DynamoDBTableActive(conn *dynamodb.DynamoDB, tableName string) (*dynamodb.TableDescription, error) {
+func DynamoDBTableActive(conn *dynamodb.DynamoDB, tableName string, timeout time.Duration) (*dynamodb.TableDescription, error) {
 	stateConf := &resource.StateChangeConf{
 		Pending: []string{
 			dynamodb.TableStatusCreating,
@@ -56,7 +56,7 @@ func DynamoDBTableActive(conn *dynamodb.DynamoDB, tableName string) (*dynamodb.T
 		Target: []string{
 			dynamodb.TableStatusActive,
 		},
-		Timeout: CreateTableTimeout,
+		Timeout: timeout,
 		Refresh: DynamoDBTableStatus(conn, tableName),
 	}
 

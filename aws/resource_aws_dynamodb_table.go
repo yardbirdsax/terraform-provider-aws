@@ -439,7 +439,7 @@ func resourceAwsDynamoDbTableCreate(d *schema.ResourceData, meta interface{}) er
 	d.SetId(aws.StringValue(output.TableDescription.TableName))
 	d.Set("arn", output.TableDescription.TableArn)
 
-	if _, err := waiter.DynamoDBTableActive(conn, d.Id()); err != nil {
+	if _, err := waiter.DynamoDBTableActive(conn, d.Id(), d.Timeout(schema.TimeoutCreate)); err != nil {
 		return fmt.Errorf("error waiting for creation of DynamoDB table (%s): %w", d.Id(), err)
 	}
 
@@ -701,7 +701,7 @@ func resourceAwsDynamoDbTableUpdate(d *schema.ResourceData, meta interface{}) er
 			return fmt.Errorf("error updating DynamoDB Table (%s): %w", d.Id(), err)
 		}
 
-		if _, err := waiter.DynamoDBTableActive(conn, d.Id()); err != nil {
+		if _, err := waiter.DynamoDBTableActive(conn, d.Id(), d.Timeout(schema.TimeoutUpdate)); err != nil {
 			return fmt.Errorf("error waiting for DynamoDB Table (%s) update: %w", d.Id(), err)
 		}
 
