@@ -7,6 +7,7 @@ import (
 	"log"
 	"reflect"
 	"strings"
+	"time"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/dynamodb"
@@ -461,7 +462,7 @@ func resourceAwsDynamoDbTableCreate(d *schema.ResourceData, meta interface{}) er
 	}
 
 	if v := d.Get("replica").(*schema.Set); v.Len() > 0 {
-		if err := createDynamoDbReplicas(d.Id(), v.List(), conn); err != nil {
+		if err := createDynamoDbReplicas(d.Id(), v.List(), conn, d.Timeout(schema.TimeoutCreate)); err != nil {
 			return fmt.Errorf("error initially creating DynamoDB Table (%s) replicas: %w", d.Id(), err)
 		}
 	}
@@ -822,7 +823,7 @@ func isDynamoDbTableOptionDisabled(v interface{}) bool {
 
 // CRUD helpers
 
-func createDynamoDbReplicas(tableName string, tfList []interface{}, conn *dynamodb.DynamoDB) error {
+func createDynamoDbReplicas(tableName string, tfList []interface{}, conn *dynamodb.DynamoDB, timeout time.Duration) error {
 	for _, tfMapRaw := range tfList {
 		tfMap, ok := tfMapRaw.(map[string]interface{})
 
@@ -875,7 +876,7 @@ func createDynamoDbReplicas(tableName string, tfList []interface{}, conn *dynamo
 			return fmt.Errorf("error creating DynamoDB Table (%s) replica (%s): %w", tableName, tfMap["region_name"].(string), err)
 		}
 
-		if _, err := waiter.DynamoDBReplicaActive(conn, tableName, tfMap["region_name"].(string)); err != nil {
+		if _, err := waiter.DynamoDBReplicaActive(conn, tableName, tfMap["region_name"].(string), timeout); err != nil {
 			return fmt.Errorf("error waiting for DynamoDB Table (%s) replica (%s) creation: %w", tableName, tfMap["region_name"].(string), err)
 		}
 	}
@@ -954,7 +955,7 @@ func updateDynamoDbReplica(d *schema.ResourceData, conn *dynamodb.DynamoDB) erro
 	added := n.Difference(o).List()
 
 	if len(added) > 0 {
-		if err := createDynamoDbReplicas(d.Id(), added, conn); err != nil {
+		if err := createDynamoDbReplicas(d.Id(), added, conn, d.Timeout(schema.TimeoutUpdate)); err != nil {
 			return fmt.Errorf("error updating DynamoDB replicas for table (%s), while creating: %w", d.Id(), err)
 		}
 	}

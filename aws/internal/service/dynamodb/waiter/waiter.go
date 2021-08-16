@@ -89,7 +89,7 @@ func DynamoDBTableDeleted(conn *dynamodb.DynamoDB, tableName string) (*dynamodb.
 	return nil, err
 }
 
-func DynamoDBReplicaActive(conn *dynamodb.DynamoDB, tableName, region string) (*dynamodb.DescribeTableOutput, error) {
+func DynamoDBReplicaActive(conn *dynamodb.DynamoDB, tableName, region string, timeout time.Duration) (*dynamodb.DescribeTableOutput, error) {
 	stateConf := &resource.StateChangeConf{
 		Pending: []string{
 			dynamodb.ReplicaStatusCreating,
@@ -99,7 +99,7 @@ func DynamoDBReplicaActive(conn *dynamodb.DynamoDB, tableName, region string) (*
 		Target: []string{
 			dynamodb.ReplicaStatusActive,
 		},
-		Timeout: ReplicaUpdateTimeout,
+		Timeout: timeout,
 		Refresh: DynamoDBReplicaUpdate(conn, tableName, region),
 	}
 
