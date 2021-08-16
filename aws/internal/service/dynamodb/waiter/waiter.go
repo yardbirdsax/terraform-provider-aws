@@ -134,7 +134,7 @@ func DynamoDBReplicaDeleted(conn *dynamodb.DynamoDB, tableName, region string) (
 	return nil, err
 }
 
-func DynamoDBGSIActive(conn *dynamodb.DynamoDB, tableName, indexName string) (*dynamodb.GlobalSecondaryIndexDescription, error) {
+func DynamoDBGSIActive(conn *dynamodb.DynamoDB, tableName, indexName string, timeout time.Duration) (*dynamodb.GlobalSecondaryIndexDescription, error) {
 	stateConf := &resource.StateChangeConf{
 		Pending: []string{
 			dynamodb.IndexStatusCreating,
@@ -143,7 +143,7 @@ func DynamoDBGSIActive(conn *dynamodb.DynamoDB, tableName, indexName string) (*d
 		Target: []string{
 			dynamodb.IndexStatusActive,
 		},
-		Timeout: UpdateTableTimeout,
+		Timeout: timeout,
 		Refresh: DynamoDBGSIStatus(conn, tableName, indexName),
 	}
 

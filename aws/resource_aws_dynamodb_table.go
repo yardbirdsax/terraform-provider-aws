@@ -712,7 +712,7 @@ func resourceAwsDynamoDbTableUpdate(d *schema.ResourceData, meta interface{}) er
 
 			idxName := aws.StringValue(gsiUpdate.Update.IndexName)
 
-			if _, err := waiter.DynamoDBGSIActive(conn, d.Id(), idxName); err != nil {
+			if _, err := waiter.DynamoDBGSIActive(conn, d.Id(), idxName, d.Timeout(schema.TimeoutUpdate)); err != nil {
 				return fmt.Errorf("error waiting for DynamoDB Table (%s) Global Secondary Index (%s) update: %w", d.Id(), idxName, err)
 			}
 		}
@@ -736,7 +736,7 @@ func resourceAwsDynamoDbTableUpdate(d *schema.ResourceData, meta interface{}) er
 			return fmt.Errorf("error creating DynamoDB Table (%s) Global Secondary Index (%s): %w", d.Id(), idxName, err)
 		}
 
-		if _, err := waiter.DynamoDBGSIActive(conn, d.Id(), idxName); err != nil {
+		if _, err := waiter.DynamoDBGSIActive(conn, d.Id(), idxName, d.Timeout(schema.TimeoutUpdate)); err != nil {
 			return fmt.Errorf("error waiting for DynamoDB Table (%s) Global Secondary Index (%s) creation: %w", d.Id(), idxName, err)
 		}
 	}
