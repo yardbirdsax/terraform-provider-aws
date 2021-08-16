@@ -36,7 +36,7 @@ func resourceAwsDynamoDbTable() *schema.Resource {
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(waiter.CreateTableTimeout),
 			Delete: schema.DefaultTimeout(waiter.DeleteTableTimeout),
-			Update: schema.DefaultTimeout(waiter.UpdateTableTimeoutTotal),
+			Update: schema.DefaultTimeout(waiter.UpdateTableTimeout),
 		},
 
 		CustomizeDiff: customdiff.Sequence(
